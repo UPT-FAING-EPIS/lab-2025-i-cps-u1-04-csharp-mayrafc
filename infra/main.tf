@@ -67,10 +67,11 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 }
 
+# Change the SQL Server region to westeurope
 resource "azurerm_mssql_server" "sqlsrv" {
   name                         = "upt-dbs-${random_integer.ri.result}"
   resource_group_name          = azurerm_resource_group.rg.name
-  location                     = azurerm_resource_group.rg.location
+  location                     = "westeurope"  # Región "westeurope"
   version                      = "12.0"
   administrator_login          = var.sqladmin_username
   administrator_login_password = var.sqladmin_password
