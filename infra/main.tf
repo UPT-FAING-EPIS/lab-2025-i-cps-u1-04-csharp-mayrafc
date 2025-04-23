@@ -40,13 +40,13 @@ resource "azurerm_resource_group" "rg" {
   location = "eastus"  # Región "eastus"
 }
 
-# Create the Linux App Service Plan
+# Create the Linux App Service Plan with a production-ready SKU
 resource "azurerm_service_plan" "appserviceplan" {
   name                = "upt-asp-${random_integer.ri.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
-  sku_name            = "B1"  # Plan mejor que F1, B1 es adecuado para producción
+  sku_name            = "B1"  # B1 plan is more suitable for production than F1
 }
 
 # Create the web app, pass in the App Service Plan ID
@@ -59,7 +59,7 @@ resource "azurerm_linux_web_app" "webapp" {
   
   site_config {
     minimum_tls_version = "1.2"
-    always_on = true  # Mantener la aplicación siempre activa
+    always_on = true  # Keep the app always on for production
     application_stack {
       docker_image_name = "patrickcuadros/shorten:latest"
       docker_registry_url = "https://index.docker.io"
@@ -67,17 +67,17 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 }
 
-# SQL Server para producción en una región adecuada y con SKU Premium
+# SQL Server with Premium SKU for production in the appropriate region
 resource "azurerm_mssql_server" "sqlsrv" {
   name                         = "upt-dbs-${random_integer.ri.result}"
   resource_group_name          = azurerm_resource_group.rg.name
-  location                     = "eastus"  # Región "eastus", cambiar a la preferida
+  location                     = "eastus"  # Region "eastus", change to preferred region
   version                      = "12.0"
   administrator_login          = var.sqladmin_username
   administrator_login_password = var.sqladmin_password
 }
 
-# Firewalls rules para acceder desde cualquier IP pública
+# Firewall rules to allow access from any public IP
 resource "azurerm_mssql_firewall_rule" "sqlaccessrule" {
   name             = "PublicAccess"
   server_id        = azurerm_mssql_server.sqlsrv.id
@@ -85,9 +85,9 @@ resource "azurerm_mssql_firewall_rule" "sqlaccessrule" {
   end_ip_address   = "255.255.255.255"
 }
 
-# Base de datos de tipo "Basic" o "Standard" (según tus necesidades de rendimiento)
+# SQL Database with the "Basic" or "Standard" SKU (avoid "Free" for production)
 resource "azurerm_mssql_database" "sqldb" {
   name      = "shorten"
   server_id = azurerm_mssql_server.sqlsrv.id
-  sku_name  = "Basic"  # Para producción "Basic" o "Standard", evita "Free"
+  sku_name  = "Basic"  # For production, use "Basic" or "Standard"
 }
