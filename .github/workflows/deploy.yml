@@ -2,11 +2,13 @@ name: Construcción infrastructura en Azure
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
     paths:
       - 'infra/**'
-      - '.github/workflows/infra.yml'
+      - '.github/workflows/deploy.yml'  # Asegúrate de que esto esté configurado correctamente
   workflow_dispatch:
+
 
 jobs:
   Deploy-infra:
