@@ -1,16 +1,16 @@
 name: Construcción y despliegue de una aplicación MVC a Azure
 
 env:
-  AZURE_WEBAPP_NAME: upt-awa-645     # <- Tu nombre real de Azure Web App
-  DOTNET_VERSION: '8'                # Versión de .NET que estás usando
+  AZURE_WEBAPP_NAME: upt-awa-645     # El nombre de tu Azure Web App
+  DOTNET_VERSION: '8'                # La versión de .NET que estás usando
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]             # El flujo se ejecutará cuando haya un push en la rama "main"
     paths:
       - 'src/**'
       - '.github/workflows/**'
-  workflow_dispatch:
+  workflow_dispatch:                 # Permite ejecutar el flujo manualmente desde GitHub
 
 permissions:
   contents: read
@@ -18,27 +18,27 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest           # El trabajo de construcción se ejecuta en un runner Ubuntu
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4    # Revisa el código del repositorio
 
       - name: 'Login to GitHub Container Registry'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v3  # Inicia sesión en GHCR
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }} # Nombre del usuario (GitHub)
+          password: ${{ secrets.GITHUB_TOKEN }} # Token de autenticación
 
       - name: 'Build Inventory Image'
         run: |
-          docker build --progress=plain . --tag ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}
-          docker push ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}
+          docker build --progress=plain . --tag ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}  # Crea la imagen
+          docker push ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}  # Empuja la imagen al GHCR
 
   deploy:
     permissions:
-      contents: none
-    runs-on: ubuntu-latest
-    needs: build
+      contents: none                # No se requiere permisos adicionales para el despliegue
+    runs-on: ubuntu-latest           # El trabajo de despliegue también se ejecuta en un runner Ubuntu
+    needs: build                     # El despliegue depende del trabajo de construcción
     environment:
       name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -46,8 +46,8 @@ jobs:
     steps:
       - name: Desplegar a Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v2  # Usa la acción oficial de Azure para el despliegue
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}  # Nombre de tu aplicación en Azure
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}  # Perfil de publicación
+          images: ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}  # Imagen de contenedor a desplegar
