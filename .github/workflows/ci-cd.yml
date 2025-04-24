@@ -31,8 +31,8 @@ jobs:
 
       - name: 'Build Inventory Image'
         run: |
-          docker build --progress=plain . --tag ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}  # Crea la imagen
-          docker push ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}  # Empuja la imagen al GHCR
+           docker build --progress=plain . --tag ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}
+           docker push ghcr.io/${{ github.actor }}/shorten:${{ github.sha }}
 
   deploy:
     permissions:
