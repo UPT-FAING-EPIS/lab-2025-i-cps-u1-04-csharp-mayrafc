@@ -66,7 +66,7 @@ resource "azurerm_linux_web_app" "webapp" {
     }
   }
 }
-
+//mayra               
 # SQL Server with Premium SKU for production in the appropriate region
 resource "azurerm_mssql_server" "sqlsrv" {
   name                         = "upt-dbs-${random_integer.ri.result}"
@@ -76,7 +76,7 @@ resource "azurerm_mssql_server" "sqlsrv" {
   administrator_login          = var.sqladmin_username
   administrator_login_password = var.sqladmin_password
 }
-
+//mayra               
 # Firewall rules to allow access from any public IP
 resource "azurerm_mssql_firewall_rule" "sqlaccessrule" {
   name             = "PublicAccess"
@@ -85,10 +85,11 @@ resource "azurerm_mssql_firewall_rule" "sqlaccessrule" {
   end_ip_address   = "255.255.255.255"
 }
 
+
 # SQL Database with the "Basic" or "Standard" SKU
 resource "azurerm_mssql_database" "sqldb" {
   name      = "shorten"
   server_id = azurerm_mssql_server.sqlsrv.id
   sku_name  = "Basic"
 }
-                
+
