@@ -9,18 +9,18 @@ terraform {
 }
 
 variable "suscription_id" {
-    type = string
-    description = "Azure subscription id"
+  type        = string
+  description = "Azure subscription id"
 }
 
 variable "sqladmin_username" {
-    type = string
-    description = "Administrator username for server"
+  type        = string
+  description = "Administrator username for server"
 }
 
 variable "sqladmin_password" {
-    type = string
-    description = "Administrator password for server"
+  type        = string
+  description = "Administrator password for server"
 }
 
 provider "azurerm" {
@@ -37,7 +37,7 @@ resource "random_integer" "ri" {
 # Create the resource group
 resource "azurerm_resource_group" "rg" {
   name     = "upt-arg-${random_integer.ri.result}"
-  location = "eastus"  # Región "eastus"
+  location = "centralus"
 }
 
 # Create the Linux App Service Plan with a production-ready SKU
@@ -46,23 +46,23 @@ resource "azurerm_service_plan" "appserviceplan" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
-  sku_name            = "B1"  # B1 plan is more suitable for production than F1
+  sku_name            = "B1"
 }
 
 # Create the web app, pass in the App Service Plan ID
 resource "azurerm_linux_web_app" "webapp" {
-  name                  = "upt-awa-${random_integer.ri.result}"
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
-  service_plan_id       = azurerm_service_plan.appserviceplan.id
-  depends_on            = [azurerm_service_plan.appserviceplan]
-  
+  name                = "upt-awa-${random_integer.ri.result}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  service_plan_id     = azurerm_service_plan.appserviceplan.id
+  depends_on          = [azurerm_service_plan.appserviceplan]
+
   site_config {
     minimum_tls_version = "1.2"
-    always_on = true  # Keep the app always on for production
+    always_on           = true
     application_stack {
-      docker_image_name = "patrickcuadros/shorten:latest"
-      docker_registry_url = "https://index.docker.io"
+      docker_image_name     = "patrickcuadros/shorten:latest"
+      docker_registry_url   = "https://index.docker.io"
     }
   }
 }
@@ -71,7 +71,7 @@ resource "azurerm_linux_web_app" "webapp" {
 resource "azurerm_mssql_server" "sqlsrv" {
   name                         = "upt-dbs-${random_integer.ri.result}"
   resource_group_name          = azurerm_resource_group.rg.name
-  location                     = "eastus"  # Region "eastus", change to preferred region
+  location                     = "centralus"
   version                      = "12.0"
   administrator_login          = var.sqladmin_username
   administrator_login_password = var.sqladmin_password
@@ -85,9 +85,10 @@ resource "azurerm_mssql_firewall_rule" "sqlaccessrule" {
   end_ip_address   = "255.255.255.255"
 }
 
-# SQL Database with the "Basic" or "Standard" SKU (avoid "Free" for production)
+# SQL Database with the "Basic" or "Standard" SKU
 resource "azurerm_mssql_database" "sqldb" {
   name      = "shorten"
   server_id = azurerm_mssql_server.sqlsrv.id
-  sku_name  = "Basic"  # For production, use "Basic" or "Standard"
+  sku_name  = "Basic"
 }
+                
