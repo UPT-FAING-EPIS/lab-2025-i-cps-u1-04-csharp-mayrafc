@@ -27,7 +27,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }} # Nombre del usuario (GitHub)
-          password: ${{ secrets.GITHUB_TOKEN }} # Token de autenticación
+          password: ${{ secrets.GHCR_TOKEN }} # Token de autenticación
 
       - name: 'Build Inventory Image'
         run: |
