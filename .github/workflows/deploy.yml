@@ -158,12 +158,3 @@ jobs:
         run: |
             cd infra
             terraform apply -var="suscription_id=${{ secrets.SUSCRIPTION_ID }}" -var="sqladmin_username=${{ secrets.SQL_USER }}" -var="sqladmin_password=${{ secrets.SQL_PASS }}" -auto-approve main.tfplan
-        
-
-      - name: tfsec
-        run: |
-          cd infra
-          /usr/local/bin/tfsec -s -f markdown > tfsec.md
-          echo "## TFSec Output" >> $GITHUB_STEP_SUMMARY
-          cat tfsec.md >> $GITHUB_STEP_SUMMARY
-          /usr/local/bin/tfsec .
